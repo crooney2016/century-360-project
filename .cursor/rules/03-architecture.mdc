@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+Provide clear architectural guardrails for Next.js 15 App Router with SSR/RSC, GraphQL (Apollo), Prisma OLTP, and Puck. Optimize for maintainability, performance, and enterprise consistency.
+
+### Stack Overview
+
+- **Runtime**: Next.js 15 (App Router)
+- **Rendering**: SSR by default, RSC-first with selective client islands
+- **Data**: GraphQL (Apollo Server in API route + Apollo Client), Prisma with PostgreSQL
+- **UI**: Chakra UI v2 + SaaS UI v2 (glass theme)
+- **Page Builder**: Puck (@measured/puck)
+
+### Module Boundaries
+
+- **app/**: Route handlers, layouts, server actions, RSC components. Avoid business logic here.
+- **components/**: Presentational components by atomic layers: `atoms/`, `molecules/`, `organisms/`, plus `layout/` and `puck/`.
+- **graphql/**: `schema.ts`, `resolvers.ts`, `server.ts`, generated types under `graphql/generated/`.
+- **lib/**: Cross-cutting utilities: `apollo-client.ts`, `prisma.ts`, `theme/`, `fetchers.ts`, `health-monitor.ts`.
+- **hooks/**: React hooks that orchestrate components and data.
+- **stores/**: Zustand stores for view state only. No business rules.
+- **config/**: Environment switching and constants.
+
+### Server Components First
+
+- Components are server by default. Add `"use client"` only for interactivity (event handlers, local state, animations).
+- Fetch data server-side in route/layout/page and pass serializable props to client islands.
+- Never expose secrets or raw env vars to client components.
+
+### Data Flow & GraphQL
+
+- Prefer GraphQL for cross-page data contracts. Keep resolvers thin; delegate to Prisma queries in `lib` or dedicated data services.
+- Use cursor/connection pagination for lists. Implement filtering and sorting in resolvers with Prisma.
+- Generate types with `graphql-codegen` (see `codegen.yml`); use generated types for resolver signatures and client queries.
+
+### Prisma & OLTP
+
+- All database write paths go through Prisma. No raw SQL unless absolutely necessary.
+- Co-locate Prisma mappers in `graphql/mappers.ts` and keep resolver mapping explicit.
+- Enforce transactional integrity with `prisma.$transaction` for multi-write operations.
+
+### Caching Strategy
+
+- Server: Leverage React/Next caches and route segment caching where safe. Revalidate on mutations.
+- Client: Configure Apollo cache policies per field; favor cursor pagination merges.
+- Avoid duplicating SWR and Apollo for the same data. Pick one per surface.
+
+### Error, Loading, and Suspense
+
+- Use route-level `loading.tsx` and `error.tsx` for UX consistency.
+- Wrap client islands with `Suspense` when they depend on async data.
+- Map GraphQL errors to user-friendly messages; never leak internal details.
+
+### File & Naming Conventions
+
+- Components: PascalCase files and exports.
+- Hooks: `useX.ts` with explicit return types.
+- Pages/routes: Co-locate minimal data fetching in the route. Business logic belongs in `lib/` or `graphql/`.
+
+### Puck Integration
+
+- Keep Puck renderers in `components/puck/`. Render only serializable props; avoid passing functions.
+- Ensure Puck components are SSR-safe and degrade gracefully when data is missing.
+
+### Observability
+
+- Centralize logging and health checks in `lib/health-monitor.ts`. Add request IDs in GraphQL context.
+- Track resolver latency and cache hits where practical.
+
+### Security & Access
+
+- Perform authz checks at resolver boundaries. Validate inputs with `zod` for mutations.
+- Never trust client-provided IDs without verification.
+
+### Performance Guardrails
+
+- Avoid unnecessary client bundles. Split large client components into lazy chunks.
+- Keep route handlers and RSC free of heavy client-only dependencies.
+-

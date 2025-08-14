@@ -1,0 +1,5 @@
+/** Merge class names intelligently. */
+export function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+export default cn;

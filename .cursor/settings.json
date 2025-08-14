@@ -1,0 +1,16 @@
+{
+  "ai": {
+    "systemPrompt": "You are an AI assistant for the Century 360 project. Follow the systematic decision framework and apply enterprise architecture patterns. Always check with the user before major refactors or architectural changes.",
+    "contextStrategy": "comprehensive",
+    "temperature": 0.1,
+    "maxTokens": 32000
+  },
+  "workspace": {
+    "name": "Century 360 Project",
+    "description": "Enterprise platform with AKS-based environments and GraphQL API gateway"
+  },
+  "editor": {
+    "formatOnSave": true,
+    "defaultFormatter": "prettier"
+  }
+}

@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+Provide a lightweight ADR (Architecture Decision Record) process to guide major choices.
+
+### When To Create An ADR
+
+- Breaking API changes, data model changes, or cross-cutting architectural shifts
+- Dependency swaps/upgrades that affect many modules
+- Security posture or compliance changes
+
+### ADR Template
+
+Copy into `docs/architecture/` as `ADR-YYYYMMDD-short-title.md`.
+
+```
+# Title
+
+## Context
+What problem are we solving? Constraints and requirements.
+
+## Options Considered
+- Option A
+- Option B
+- Option C
+
+## Decision
+Chosen option and rationale.
+
+## Consequences
+Positive, negative, and risks. Rollback plan.
+
+## Implementation Notes
+Milestones, owners, and validation plan (tests, benchmarks).
+```
+
+### Governance
+
+- Major decisions require user approval before implementation.
+- Record follow-ups and revisit dates if the decision is provisional.

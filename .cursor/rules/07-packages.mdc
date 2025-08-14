@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+Package management and dependency hygiene with pnpm.
+
+### Package Strategy
+
+- Use latest stable versions, pinned in `package.json`.
+- Prefer minor/patch bumps regularly; plan majors via separate fork/repo branch and full test cycle before merge.
+- Keep `@prisma/client` and `prisma` in lockstep. Regenerate after updates.
+
+### Commands
+
+- Audit: `pnpm security:check` (and `pnpm audit`), fix with `pnpm audit --fix` when safe.
+- Outdated: `pnpm security:outdated` then plan upgrades.
+- Why/trace: `pnpm why <pkg>` to understand dependency trees.
+
+### Scripts & Workflow
+
+- Keep scripts minimal and composable:
+  - `format` → Prettier write
+  - `lint` → ESLint with `--max-warnings=0`
+  - `typecheck` → `tsc --noEmit`
+  - `codegen` → `prisma:generate` + `graphql:codegen` + `barrels`
+  - `build:pipeline` → `codegen` + `next build --no-lint`
+  - `build:full` → `format` + `lint` + `typecheck` + `build:pipeline`
+  - `dev` / `dev:all` for app + local DB
+- Prefer library-provided assets: add `@chakra-ui/icons` and use as the default icon set; avoid duplicate icon libraries unless necessary and documented.
+
+### Constraints
+
+- No runtime dependency changes in the middle of a feature unless required. Document in PR.
+- Avoid experimental packages for core flows. Prefer well-adopted, enterprise-grade libs.
+
+### UI Libraries
+
+- Chakra UI v2 + SaaS UI v2 only. Follow our theme extension and component conventions in `05-ui.mdc`.
+
+### GraphQL & Client
+
+- Align `graphql`, `@apollo/client`, and codegen plugin versions. Re-run `pnpm graphql:codegen` after bumps.

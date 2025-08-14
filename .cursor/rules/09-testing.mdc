@@ -1,0 +1,768 @@
+# Testing & Quality Assurance - Century 360 Project
+
+## 🧪 **Testing Strategy**
+
+### **Testing Pyramid**
+
+#### **Foundation Layer (Unit Tests)**
+- **Coverage Target**: 80%+ for business logic
+- **Framework**: Vitest for fast, reliable unit testing
+- **Scope**: Individual functions, components, and utilities
+- **Execution**: Fast (<100ms per test), run on every commit
+
+#### **Integration Layer (Component Tests)**
+- **Coverage Target**: 70%+ for component interactions
+- **Framework**: Vitest + React Testing Library
+- **Scope**: Component integration, API calls, state management
+- **Execution**: Medium speed (<1s per test), run on PR
+
+#### **End-to-End Layer (E2E Tests)**
+- **Coverage Target**: Critical user journeys
+- **Framework**: Playwright for cross-browser testing
+- **Scope**: Complete user workflows, cross-browser compatibility
+- **Execution**: Slower (<30s per test), run on main branch
+
+### **Testing Principles**
+
+#### **Quality Standards**
+- **Zero false positives** - Tests must be reliable
+- **Fast execution** - Unit tests under 100ms
+- **Clear assertions** - Easy to understand test failures
+- **Maintainable** - Tests should be easy to update
+- **Comprehensive** - Cover happy path, edge cases, and errors
+
+#### **Test Organization**
+```
+src/
+├── components/
+│   ├── atoms/
+│   │   ├── Button/
+│   │   │   ├── Button.tsx
+│   │   │   ├── Button.test.tsx
+│   │   │   └── Button.stories.tsx
+│   │   └── Input/
+│   ├── molecules/
+│   └── organisms/
+├── lib/
+│   ├── api/
+│   │   ├── client.ts
+│   │   └── client.test.ts
+│   └── utils/
+│       ├── validation.ts
+│       └── validation.test.ts
+└── tests/
+    ├── setup/
+    ├── mocks/
+    └── fixtures/
+```
+
+## 🚀 **Vitest Configuration**
+
+### **Core Configuration**
+
+#### **Vitest Config**
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/tests/setup/vitest.setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/tests/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/*.stories.*',
+        '**/coverage/**',
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+    },
+    testTimeout: 10000,
+    hookTimeout: 10000,
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@/components': resolve(__dirname, './src/components'),
+      '@/lib': resolve(__dirname, './src/lib'),
+      '@/types': resolve(__dirname, './src/types'),
+    },
+  },
+});
+```
+
+#### **Test Setup**
+```typescript
+// src/tests/setup/vitest.setup.ts
+import '@testing-library/jest-dom';
+import { vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+// Global test cleanup
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+// Mock IntersectionObserver
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+```
+
+### **Test Utilities**
+
+#### **Custom Render Function**
+```typescript
+// src/tests/utils/test-utils.tsx
+import React, { ReactElement } from 'react';
+import { render, RenderOptions } from '@testing-library/react';
+import { ChakraProvider } from '@chakra-ui/react';
+import { theme } from '@/lib/theme';
+
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  wrapper?: React.ComponentType<{ children: React.ReactNode }>;
+}
+
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <ChakraProvider theme={theme}>
+      {children}
+    </ChakraProvider>
+  );
+};
+
+const customRender = (
+  ui: ReactElement,
+  options?: CustomRenderOptions
+) => {
+  const Wrapper = options?.wrapper || AllTheProviders;
+
+  return render(ui, {
+    wrapper: Wrapper,
+    ...options,
+  });
+};
+
+export * from '@testing-library/react';
+export { customRender as render };
+```
+
+#### **Mock Data Factories**
+```typescript
+// src/tests/fixtures/user.fixtures.ts
+import { User, UserProfile } from '@/types/user';
+
+export const createMockUser = (overrides: Partial<User> = {}): User => ({
+  id: 'user-1',
+  email: 'test@example.com',
+  role: 'user',
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
+  ...overrides,
+});
+
+export const createMockUserProfile = (overrides: Partial<UserProfile> = {}): UserProfile => ({
+  id: 'profile-1',
+  userId: 'user-1',
+  firstName: 'John',
+  lastName: 'Doe',
+  avatar: null,
+  bio: 'Test user bio',
+  ...overrides,
+});
+
+export const createMockUsers = (count: number): User[] => {
+  return Array.from({ length: count }, (_, index) =>
+    createMockUser({
+      id: `user-${index + 1}`,
+      email: `user${index + 1}@example.com`,
+    })
+  );
+};
+```
+
+## 🧩 **Component Testing**
+
+### **React Testing Library Patterns**
+
+#### **Component Test Structure**
+```typescript
+// src/components/atoms/Button/Button.test.tsx
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@/tests/utils/test-utils';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders with correct text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
+  });
+
+  it('calls onClick when clicked', () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies variant styles correctly', () => {
+    render(<Button variant="solid">Solid Button</Button>);
+    const button = screen.getByRole('button');
+
+    expect(button).toHaveClass('chakra-button');
+  });
+
+  it('disables button when disabled prop is true', () => {
+    render(<Button disabled>Disabled Button</Button>);
+    const button = screen.getByRole('button');
+
+    expect(button).toBeDisabled();
+  });
+
+  it('shows loading state when isLoading is true', () => {
+    render(<Button isLoading>Loading Button</Button>);
+
+    expect(screen.getByRole('button')).toBeDisabled();
+    expect(screen.getByText('Loading Button')).toBeInTheDocument();
+  });
+});
+```
+
+#### **Form Component Testing**
+```typescript
+// src/components/molecules/LoginForm/LoginForm.test.tsx
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@/tests/utils/test-utils';
+import { LoginForm } from './LoginForm';
+
+describe('LoginForm', () => {
+  const mockOnSubmit = vi.fn();
+
+  beforeEach(() => {
+    mockOnSubmit.mockClear();
+  });
+
+  it('renders form fields correctly', () => {
+    render(<LoginForm onSubmit={mockOnSubmit} />);
+
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it('validates required fields', async () => {
+    render(<LoginForm onSubmit={mockOnSubmit} />);
+
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+    });
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('submits form with valid data', async () => {
+    render(<LoginForm onSubmit={mockOnSubmit} />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      });
+    });
+  });
+
+  it('shows error message for invalid email', async () => {
+    render(<LoginForm onSubmit={mockOnSubmit} />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
+
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/invalid email format/i)).toBeInTheDocument();
+    });
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+});
+```
+
+### **Hook Testing**
+
+#### **Custom Hook Testing**
+```typescript
+// src/hooks/useAuth.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthProvider } from '@/contexts/AuthContext';
+
+// Mock the auth service
+vi.mock('@/lib/auth', () => ({
+  login: vi.fn(),
+  logout: vi.fn(),
+  getCurrentUser: vi.fn(),
+}));
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <AuthProvider>{children}</AuthProvider>
+);
+
+describe('useAuth', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns initial auth state', () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    expect(result.current.user).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isAuthenticated).toBe(false);
+  });
+
+  it('handles login successfully', async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      await result.current.login('test@example.com', 'password');
+    });
+
+    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.user).toBeDefined();
+  });
+
+  it('handles login failure', async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    // Mock login to throw error
+    vi.mocked(login).mockRejectedValueOnce(new Error('Invalid credentials'));
+
+    await act(async () => {
+      try {
+        await result.current.login('test@example.com', 'wrong-password');
+      } catch (error) {
+        // Expected error
+      }
+    });
+
+    expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.user).toBeNull();
+  });
+
+  it('handles logout', async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    // First login
+    await act(async () => {
+      await result.current.login('test@example.com', 'password');
+    });
+
+    expect(result.current.isAuthenticated).toBe(true);
+
+    // Then logout
+    await act(async () => {
+      await result.current.logout();
+    });
+
+    expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.user).toBeNull();
+  });
+});
+```
+
+## 🌐 **Playwright E2E Testing**
+
+### **Configuration**
+
+#### **Playwright Config**
+```typescript
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './src/tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+
+  use: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
+
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+});
+```
+
+### **E2E Test Patterns**
+
+#### **Page Object Model**
+```typescript
+// src/tests/e2e/pages/LoginPage.ts
+import { Page, Locator, expect } from '@playwright/test';
+
+export class LoginPage {
+  readonly page: Page;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly submitButton: Locator;
+  readonly errorMessage: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.emailInput = page.getByLabel(/email/i);
+    this.passwordInput = page.getByLabel(/password/i);
+    this.submitButton = page.getByRole('button', { name: /sign in/i });
+    this.errorMessage = page.getByTestId('error-message');
+  }
+
+  async goto() {
+    await this.page.goto('/login');
+  }
+
+  async login(email: string, password: string) {
+    await this.emailInput.fill(email);
+    await this.passwordInput.fill(password);
+    await this.submitButton.click();
+  }
+
+  async expectErrorMessage(message: string) {
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toContainText(message);
+  }
+
+  async expectSuccessfulLogin() {
+    await expect(this.page).toHaveURL('/dashboard');
+  }
+}
+```
+
+#### **E2E Test Implementation**
+```typescript
+// src/tests/e2e/auth.spec.ts
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+
+test.describe('Authentication', () => {
+  let loginPage: LoginPage;
+
+  test.beforeEach(async ({ page }) => {
+    loginPage = new LoginPage(page);
+    await loginPage.goto();
+  });
+
+  test('user can login with valid credentials', async ({ page }) => {
+    await loginPage.login('test@example.com', 'password123');
+    await loginPage.expectSuccessfulLogin();
+  });
+
+  test('user sees error with invalid credentials', async ({ page }) => {
+    await loginPage.login('invalid@example.com', 'wrongpassword');
+    await loginPage.expectErrorMessage('Invalid email or password');
+  });
+
+  test('form validation works correctly', async ({ page }) => {
+    await loginPage.submitButton.click();
+
+    await expect(page.getByText(/email is required/i)).toBeVisible();
+    await expect(page.getByText(/password is required/i)).toBeVisible();
+  });
+
+  test('user can navigate to forgot password', async ({ page }) => {
+    await page.getByRole('link', { name: /forgot password/i }).click();
+    await expect(page).toHaveURL('/forgot-password');
+  });
+});
+```
+
+## 📊 **Test Coverage & Quality**
+
+### **Coverage Requirements**
+
+#### **Coverage Thresholds**
+```typescript
+// vitest.config.ts coverage section
+coverage: {
+  provider: 'v8',
+  reporter: ['text', 'json', 'html'],
+  exclude: [
+    'node_modules/',
+    'src/tests/',
+    '**/*.d.ts',
+    '**/*.config.*',
+    '**/*.stories.*',
+    '**/coverage/**',
+  ],
+  thresholds: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    // Stricter requirements for critical modules
+    './src/lib/': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './src/components/': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
+},
+```
+
+#### **Coverage Reports**
+```typescript
+// package.json scripts
+{
+  "scripts": {
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:html": "vitest run --coverage --reporter=html",
+    "test:coverage:badge": "vitest run --coverage --reporter=json && node scripts/generate-coverage-badge.js"
+  }
+}
+```
+
+### **Test Quality Metrics**
+
+#### **Test Performance**
+```typescript
+// vitest.config.ts
+test: {
+  globals: true,
+  environment: 'jsdom',
+  setupFiles: ['./src/tests/setup/vitest.setup.ts'],
+  coverage: {
+    // ... coverage config
+  },
+  testTimeout: 10000, // 10 seconds max per test
+  hookTimeout: 10000, // 10 seconds max per hook
+  // Performance thresholds
+  maxConcurrency: 4, // Limit concurrent tests
+  pool: 'forks', // Use separate processes for isolation
+},
+```
+
+#### **Test Reliability**
+```typescript
+// src/tests/utils/reliability.ts
+export const waitForElement = async (
+  selector: string,
+  timeout = 5000
+): Promise<Element> => {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+
+    const checkElement = () => {
+      const element = document.querySelector(selector);
+
+      if (element) {
+        resolve(element);
+        return;
+      }
+
+      if (Date.now() - startTime > timeout) {
+        reject(new Error(`Element ${selector} not found within ${timeout}ms`));
+        return;
+      }
+
+      requestAnimationFrame(checkElement);
+    };
+
+    checkElement();
+  });
+};
+```
+
+## 🔧 **Test Automation**
+
+### **CI/CD Integration**
+
+#### **GitHub Actions Test Workflow**
+```yaml
+# .github/workflows/test.yml
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop, test, uat ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    - name: Run linting
+      run: pnpm lint
+    - name: Run type checking
+      run: pnpm type-check
+    - name: Run unit tests
+      run: pnpm test:run
+    - name: Run E2E tests
+      run: pnpm test:e2e
+    - name: Generate coverage report
+      run: pnpm test:coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+```
+
+## **Test Result Reporting**
+```typescript
+// scripts/test-report.ts
+interface TestResult {
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  skippedTests: number;
+  coverage: number;
+  duration: number;
+}
+
+const generateTestReport = (results: TestResult): string => {
+  const passRate = ((results.passedTests / results.totalTests) * 100).toFixed(1);
+
+  return `
+# Test Execution Report
+
+## Summary
+- **Total Tests**: ${results.totalTests}
+- **Passed**: ${results.passedTests} (${passRate}%)
+- **Failed**: ${results.failedTests}
+- **Skipped**: ${results.skippedTests}
+- **Coverage**: ${results.coverage}%
+- **Duration**: ${results.duration}ms
+
+## Status
+${results.failedTests === 0 ? '✅ All tests passed' : '❌ Some tests failed'}
+
+## Recommendations
+${results.coverage < 80 ? '- Increase test coverage to meet 80% threshold' : ''}
+${results.duration > 30000 ? '- Optimize test execution time' : ''}
+  `.trim();
+};
+```
+
+---
+
+**Remember**: Quality testing is an investment that pays dividends in reduced bugs, faster development, and increased confidence. Focus on reliable, fast tests that provide real value to the development process.
+description:
+globs:
+alwaysApply: false
+---

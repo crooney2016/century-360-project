@@ -1,0 +1,206 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+End-to-end UI design system and implementation rules for Chakra UI v2 + SaaS UI v2, aligned with Blazity Enterprise patterns, SSR/RSC, and our atomic component architecture.
+
+### Principles
+
+- Server Components by default; add `"use client"` only for interactivity, animations, or browser-only APIs.
+- Accessibility first: semantic markup, ARIA where needed, focus management, contrast, reduced motion support.
+- Responsiveness by default via Chakra responsive props; avoid bespoke CSS when system props suffice.
+- Consistency over novelty: use our base UI library in `src/ui/` and app-level wrappers in `src/components/`.
+- Zero lint warnings; no unused props/imports; explicit prop types.
+
+### Architecture & Files
+
+- `src/ui/`: Reusable base components (atoms/molecules/organisms) used across the app.
+- `src/components/`: App-specific compositions, layouts, shells, Puck renderers.
+- Naming: Atoms, Molecules, Organisms; files and exports in PascalCase; hooks in `useX.ts`.
+- Stories and tests co-located when feasible, or under `src/tests` per existing patterns.
+
+### Theming & Tokens (Chakra v2 + SaaS UI v2)
+
+- Single theme source in `src/lib/theme/index.ts` using `extendTheme` and SaaS UI glass theme.
+- Prefer `colorScheme` for Chakra v2 components (e.g., Buttons, Badges) to keep semantics consistent.
+- Use `brand` palette for primary actions; keep neutral content on `gray` scale.
+- Add component-level theme overrides for common components (Button, Card, Input, Table) in the theme.
+- Color mode: use our color-mode utilities; avoid reading `window` in RSC; switch in client-only islands.
+
+```ts
+// Example: adding a new component style (Chakra v2)
+export const theme = extendTheme({
+  components: {
+    Heading: {
+      baseStyle: { lineHeight: 1.2 },
+      sizes: { xl: { fontWeight: "semibold" } },
+    },
+  },
+});
+```
+
+### Atomic Design Conventions
+
+- Atoms: `Button`, `Input`, `Badge`, `Icon`, `Avatar`, `Card`.
+- Molecules: `FormField`, `TopNav`, `DataToolbar`, `ExportButtons`.
+- Organisms: `ProductGrid`, `AdminShell`, complex tables and dashboards.
+- Keep atoms stateless and accessible; molecules coordinate atoms; organisms integrate data via props.
+
+### Components: Patterns & Examples
+
+- Buttons (Chakra v2):
+  - Use `colorScheme` (e.g., `brand`, `gray`) and variants `solid|outline|ghost|link|glass`.
+  - For icon-only actions use `IconButton` with `aria-label` and `Lucide` icons.
+
+```tsx
+<Button colorScheme="brand" variant="solid">Save</Button>
+<IconButton aria-label="Edit" icon={<Pencil />} />
+```
+
+- Cards: prefer Chakra `Card` with `CardHeader`, `CardBody`, `CardFooter` for structure.
+
+```tsx
+<Card>
+  <CardHeader>Title</CardHeader>
+  <CardBody>Content</CardBody>
+  <CardFooter>
+    <Button>Action</Button>
+  </CardFooter>
+</Card>
+```
+
+- Layout: use `Stack`, `HStack`, `VStack`, `Grid`, `SimpleGrid`, `Flex`. Favor `gap` over margins between siblings. Keep max widths (`container`, `maxW` tokens).
+
+- Tables: prefer SaaS UI `DataTable` (TanStack v8) for interactive grids; Chakra `Table` for simple read-only layouts.
+
+```tsx
+// SaaS UI DataTable
+import { DataTable } from "@saas-ui/data-table";
+import { createColumnHelper } from "@tanstack/react-table";
+
+const columnHelper = createColumnHelper<Product>();
+const columns = [
+  columnHelper.accessor("itemNumber", { header: "Item #" }),
+  columnHelper.accessor("name", { header: "Name" }),
+  columnHelper.accessor("dept", { header: "Dept" }),
+];
+
+<DataTable columns={columns} data={products} isSortable isSelectable pageSize={50} />;
+```
+
+- Forms: use `react-hook-form` + `@saas-ui/forms` with `zod` resolvers for schema validation.
+
+```tsx
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Field, Form, SubmitButton } from "@saas-ui/forms";
+import { z } from "zod";
+
+const ProductSchema = z.object({
+  name: z.string().min(1),
+  itemNumber: z.string().min(1),
+});
+
+<Form
+  defaultValues={{ name: "", itemNumber: "" }}
+  resolver={zodResolver(ProductSchema)}
+  onSubmit={values => onSave(values)}
+>
+  <Field name="name" label="Name" type="text" />
+  <Field name="itemNumber" label="Item #" type="text" />
+  <SubmitButton colorScheme="brand">Save</SubmitButton>
+</Form>;
+```
+
+- Dialogs/Modals: use Chakra `Modal` or our `src/ui/Dialog.tsx` wrapper; manage focus, `isOpen`, and `onClose`. Avoid modals in RSC; render in client.
+
+- Icons: prefer `@chakra-ui/icons` by default; render directly or via Chakra `Icon`. Use `lucide-react` only when a required pictogram is missing from Chakra's set.
+
+```tsx
+import { Button, Icon } from "@chakra-ui/react";
+import { CheckIcon } from "@chakra-ui/icons";
+// Default: Chakra icons
+<Button leftIcon={<CheckIcon />}>Done</Button>
+// Fallback example (only if Chakra lacks the icon):
+// import { Check } from "lucide-react";
+// <Button leftIcon={<Icon as={Check} />}>Done</Button>
+```
+
+- Motion: use `framer-motion` in client islands only. Respect reduced motion:
+
+```tsx
+import { useReducedMotion, motion } from "framer-motion";
+const shouldReduce = useReducedMotion();
+<motion.div animate={{ opacity: 1, y: shouldReduce ? 0 : 8 }} />;
+```
+
+- Editor (Tiptap): render-only in client; lazy-load heavy bundles; keep SSR-safe wrappers.
+
+- Charts (Recharts): client-only; wrap in `Suspense` or lazy-load; avoid rendering offscreen.
+
+### Puck Integration (UI Surface)
+
+- Renderers live in `src/components/puck/`; use Chakra primitives and SaaS UI components.
+- Pass only serializable props; avoid functions and class instances.
+- Provide sane defaults and layout-safe props (padding, spacing, maxW) to prevent layout shift.
+- Keep components SSR-safe; gate client-only logic behind `"use client"` and dynamic import.
+
+### Theming Do/Don’t
+
+- Do: system props for spacing/typography; theme tokens for colors.
+- Don’t: inline raw hex colors; custom CSS unless necessary; global overrides that leak across domains.
+
+### Accessibility
+
+- Keyboard: all interactive elements must be tabbable with visible focus.
+- ARIA: only when semantics can’t be expressed natively; label `IconButton`.
+- Contrast: meet WCAG AA (4.5:1 text); verify brand shades.
+- Motion: honor `prefers-reduced-motion`.
+
+### Testing & Storybook
+
+- Unit: RTL + Vitest for atoms/molecules; assert roles, labels, and states.
+- Stories: Storybook CSF; include controls/args; keep stories accessible and minimal.
+- Visual: rely on Storybook for design review; prioritize deterministic UI.
+
+### Client vs Server Guidance
+
+- RSC: layout, data fetching, heavy mapping, and serialization.
+- Client islands: event handlers, form state, animations, editors, charts.
+- Avoid fetching inside atoms; container organisms may own queries when necessary, else accept data via props.
+
+### Imports & Boundaries
+
+- Prefer relative imports within a feature; avoid deep absolute imports.
+- Keep Zustand for view state only (drawer open, filters). No business logic in stores.
+
+### Performance
+
+- Avoid over-render: memoize expensive subtrees; use `React.memo` in atoms with heavy children.
+- Lazy-load large client components (editor, charts, complex tables) and Puck editors.
+- Use `chakra` style props for layout vs custom CSS.
+
+### Checklists
+
+- Component PR
+  - [ ] Accessible (labels, roles, focus)
+  - [ ] Responsive (`base`, `md`, `lg` props)
+  - [ ] Themed (no hard-coded colors/sizes)
+  - [ ] Tests and Storybook added/updated
+  - [ ] No console warnings; zero ESLint warnings
+
+### Mappings: Preferred Components
+
+- Layout: `Box`, `Container`, `Stack/HStack/VStack`, `Grid/SimpleGrid`, `Flex`.
+- Data display: `Badge`, `Stat`, `Table` (simple), `DataTable` (interactive).
+- Forms: `FormControl`, `FormLabel`, `Input`, `Select`, `Textarea`, `Checkbox`, `Switch`, `@saas-ui/forms`.
+- Feedback: `Alert`, `Toast`, `Spinner`, `Skeleton`.
+- Navigation: `Breadcrumb`, `Tabs`, `Drawer`, `Menu`.
+- Overlays: `Modal`, `Popover`, `Tooltip`.
+
+### Guardrails
+
+- Don’t ship client-only dependencies in RSC.
+- Don’t mix styling approaches (stick to Chakra props first).
+- Don’t duplicate SWR and Apollo for the same surface.

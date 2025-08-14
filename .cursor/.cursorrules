@@ -1,0 +1,38 @@
+# Century 360 Project - Global Cursor Rules
+
+# This file is ALWAYS loaded first, then context expands intelligently
+
+## 🧠 **Core Cognitive Framework**
+
+Always start with systematic decision-making:
+
+1. **Load index.mdc** - Central rule registry
+2. **Apply core.mdc** - Cognitive principles (always active)
+3. **Expand context** - Load specific rules based on task type
+
+## 🎯 **Context Expansion Strategy**
+
+- **Code tasks**: Load `build.mdc`, `ui.mdc`, `architecture.mdc`
+- **Documentation**: Load `docs.mdc`
+- **Testing**: Load `testing.mdc`
+- **Package analysis**: Load `packages.mdc`
+- **Decision making**: Load `decision.mdc`
+
+## 🚀 **Always Apply First**
+
+- Systematic thinking before action
+- Socratic method for problem analysis
+- Enterprise architecture consideration
+- Quality-first development approach
+
+## 📋 **Task-Specific Loading**
+
+When you encounter:
+
+- **TypeScript/React**: Load `ui.mdc` + `architecture.mdc`
+- **Database/API**: Load `architecture.mdc` + `build.mdc`
+- **Documentation**: Load `docs.mdc`
+- **Testing issues**: Load `testing.mdc` + `build.mdc`
+- **Package dependencies**: Load `packages.mdc`
+
+**Remember**: Start with the index, then intelligently expand context based on the specific task requirements.

@@ -1,0 +1,28 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  // Disable Microsoft Edge Tools linting
+  "edge-devtools.webhint": false,
+  "edge-devtools.network": false,
+  "edge-devtools.console": false,
+  "webhint.enableTelemetry": false,
+  // Disable specific webhint rules
+  "webhint.configuration": {
+    "extends": ["web-recommended"],
+    "hints": {
+      "no-inline-styles": "off"
+    }
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.codeActions.triggerOnFocusChange": true
+}

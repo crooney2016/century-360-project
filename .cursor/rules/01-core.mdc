@@ -1,0 +1,151 @@
+---
+alwaysApply: true
+---
+
+```
+
+### **Ruleset Hierarchy & Loading**
+
+#### **Foundation Layer (Always Active)**
+- **index.mdc** - Central registry and mental model
+- **core.mdc** - This file, core cognitive principles
+
+#### **Acceleration Layer (Intelligent Load)**
+- **build.mdc** - Auto-attached to build/deployment files
+- **ui.mdc** - Auto-attached to frontend/component files
+- **architecture.mdc** - Auto-attached to system design files
+- **environments.mdc** - Auto-attached to infrastructure files
+- **testing.mdc** - Auto-attached to test files
+- **packages.mdc** - Auto-attached to dependency files
+
+### **Flywheel Benefits of Proper Rules**
+
+#### **Consistent Behavior**
+- **Reduced LLM confusion** - Clear, structured guidance
+- **Predictable responses** - Systematic approach to all tasks
+- **Quality consistency** - Same standards applied everywhere
+
+#### **Dev Issue Reduction**
+- **Fewer syntax errors** - Rules enforce correct patterns
+- **Architecture consistency** - Standardized approaches
+- **Documentation quality** - Consistent TSDoc standards
+
+#### **Continuous Improvement**
+- **Rule refinement** - Update rules based on observed issues
+- **Pattern evolution** - Improve rules as best practices emerge
+- **Knowledge capture** - Encode lessons learned in rules
+
+## 🔄 **Re-grounding & Context Adjustment Protocol**
+
+When the AI gets "stuck" or exceeds response TTL:
+1. **Reset to index.mdc** - Return to central mental model
+2. **Re-evaluate task type** - Determine which rules to load
+3. **Expand context intelligently** - Load relevant rule files
+4. **Apply systematic framework** - Use decision-making principles
+5. **Verify understanding** - Confirm approach with user
+
+## 🎯 **Problem-Solving Methodology**
+
+### **1. Analysis Phase**
+- Understand the problem completely
+- Identify root causes, not symptoms
+- Consider enterprise implications
+- Ask clarifying questions if needed
+
+### **2. Solution Design**
+- Consider multiple approaches
+- Evaluate trade-offs systematically
+- Prioritize long-term maintainability
+- Ensure scalability and security
+
+### **3. Implementation**
+- Follow established patterns
+- Maintain code quality standards
+- Document decisions and rationale
+- Test thoroughly before proceeding
+
+### **4. Validation**
+- Verify the solution works
+- Check for unintended consequences
+- Ensure alignment with project goals
+- Get user feedback and approval
+
+## 🔒 **Quality Standards**
+
+### **Code Quality**
+- Zero linting errors or warnings
+- Comprehensive TypeScript types
+- TSDoc documentation for all public APIs
+- Consistent code formatting
+- Prefer built-in library features over custom implementations. In UI, default to Chakra UI and SaaS UI primitives and patterns; avoid re-implementing components available in these libraries. Use `@chakra-ui/icons` as the default icon set; only add alternative icon packs when required and document via an ADR.
+
+### **Architecture Quality**
+- Separation of concerns
+- Loose coupling, high cohesion
+- Scalable and maintainable design
+- Security-first approach
+
+### **Documentation Quality**
+- Clear and concise explanations
+- Examples and use cases
+- Up-to-date information
+- User-friendly language
+
+## 🚨 **Red Flags & Warning Signs**
+
+### **Immediate Concerns**
+- Breaking existing functionality
+- Introducing security vulnerabilities
+- Creating technical debt
+- Violating established patterns
+
+### **Requires User Approval**
+- Major architectural changes
+- Dependency swaps or upgrades
+- Breaking changes to APIs
+- Significant refactoring
+
+## 📚 **Knowledge Sources**
+
+### **Primary Sources**
+- Project documentation
+- Established code patterns
+- Industry best practices
+- User requirements and feedback
+
+### **Secondary Sources**
+- Official documentation
+- Community best practices
+- Proven enterprise patterns
+- Performance benchmarks
+
+## 🎯 **Ruleset Optimization Strategy**
+
+### **Continuous Rule Refinement**
+
+#### **Monitor Rule Effectiveness**
+- Track common dev issues
+- Identify LLM confusion patterns
+- Measure rule application success
+
+#### **Iterative Improvement**
+- Update rules based on observed issues
+- Refine glob patterns for better auto-attachment
+- Enhance rule descriptions for clarity
+
+#### **Flywheel Metrics**
+- **Dev issue reduction** - Fewer bugs, syntax errors
+- **LLM consistency** - More predictable AI responses
+- **Development velocity** - Faster, higher-quality output
+- **Knowledge retention** - Rules capture lessons learned
+
+---
+
+**Remember**: These core principles guide every decision and action. The proper Cursor rules framework creates a flywheel effect that continuously reduces dev issues and improves LLM coding consistency over time.
+**Remember**: These core principles guide every decision and action. The proper Cursor rules framework creates a flywheel effect that continuously reduces dev issues and improves LLM coding consistency over time.
+
+```
+
+```
+
+```

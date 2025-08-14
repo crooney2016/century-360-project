@@ -1,0 +1,335 @@
+---
+alwaysApply: false
+---
+
+# Environment Management & CI/CD Lifecycle Rules
+
+## 🏗️ **Environment Architecture Overview**
+
+Century 360 uses an optimized AKS-based environment strategy with shared infrastructure and serverless App Service plans for cost-effective resource utilization.
+
+### **Project Architecture Focus**
+
+**⚠️ Important**: This project implements the **frontend/API layer** and **environment infrastructure**, but **NOT** the backend services. We maintain our local PostgreSQL database for development and design APIM contracts with the knowledge that backend services will be implemented separately.
+
+### **Subdomain-Based Environment Architecture**
+
+This project follows a **subdomain-based environment pattern**, treating each environment as a logical subdomain within the enterprise ecosystem:
+
+```
+🌐 app.century360.app          (prd - Production)
+🧪 tst.century360.app          (tst - Testing)
+✅ uat.century360.app          (uat - User Acceptance)
+💻 devbox.century360.app       (devbox - Cloud Dev)
+🏠 localhost:3000              (dev - Local Development)
+```
+
+### **Environment Types**
+
+| Environment | Subdomain             | Purpose             | Infrastructure          | Lifetime       | Cost        | Access                |
+| ----------- | --------------------- | ------------------- | ----------------------- | -------------- | ----------- | --------------------- |
+| **dev**     | localhost:3000        | Local development   | Local Docker            | Persistent     | Minimal     | Developers            |
+| **devbox**  | devbox.century360.app | Cloud development   | App Service Basic       | On-demand      | Low         | Individual developers |
+| **tst**     | tst.century360.app    | Automated testing   | Shared AKS + Serverless | 2-4 hours      | Pay-per-use | CI/CD                 |
+| **uat**     | uat.century360.app    | Business validation | Shared AKS + Serverless | Release cycles | Pay-per-use | Stakeholders          |
+| **prd**     | app.century360.app    | Live application    | Dedicated AKS + Premium | Persistent     | High        | End users             |
+
+## 🚀 **AKS-Based Infrastructure Strategy**
+
+### **Shared Infrastructure Benefits**
+
+- **Cost Optimization**: Shared AKS cluster for tst/uat environments
+- **Serverless Plans**: Pay-per-use App Service plans for test environments
+- **Resource Sharing**: Key Vault, Container Registry, Application Insights shared
+- **Auto-scaling**: Dynamic resource allocation based on demand
+
+### **Terraform-Managed Environments**
+
+```hcl
+# Shared infrastructure for test and UAT environments
+resource "azurerm_kubernetes_cluster" "shared" {
+  name = "century360-shared-cluster"
+  # Single cluster serves both environments
+}
+
+# Serverless App Service Plan
+resource "azurerm_app_service_plan" "shared" {
+  sku {
+    tier = "Dynamic"  # Serverless - pay only for execution time
+    size = "Y1"       # Consumption plan
+  }
+}
+```
+
+## 🔄 **CI/CD Lifecycle Pipeline**
+
+### **Pipeline Stages**
+
+1. **Development Pipeline**: Local development and testing
+2. **Test Environment Pipeline**: AKS-based automated testing
+3. **UAT Pipeline**: Business validation and stakeholder testing
+4. **Production Pipeline**: Live deployment with smoke tests
+
+### **Environment Provisioning**
+
+- **Test Environment**: Temporary VMs (2-4 hour lifetime)
+- **UAT Environment**: Persistent during release cycles
+- **Dev Box**: On-demand cloud development environment
+- **Production**: High-availability dedicated infrastructure
+
+## 📊 **Environment Configuration Management**
+
+### **Environment-Specific Variables**
+
+- **Development**: Local database, development tools, debug mode
+- **Test**: AKS-managed database, integration tools, performance monitoring
+- **UAT**: Production-like database, business tools, full monitoring
+- **Production**: Production database, security-focused, enterprise monitoring
+
+## 🔧 **AKS Infrastructure Patterns**
+
+### **Dynamic Resource Allocation**
+
+```typescript
+interface TestEnvironmentConfig {
+  vmSize: string;
+  nodeCount: number;
+  lifetime: string;
+  testSuite: string;
+}
+
+const testConfigs = {
+  unit: { vmSize: "Standard_D2s_v3", nodeCount: 1, lifetime: "30m" },
+  integration: { vmSize: "Standard_D4s_v3", nodeCount: 3, lifetime: "2h" },
+  e2e: { vmSize: "Standard_D8s_v3", nodeCount: 5, lifetime: "4h" },
+};
+```
+
+## 🎯 **Environment Decision Framework**
+
+### **When to Use Each Environment**
+
+- **Development**: Feature development, local testing, code reviews
+- **Test**: Automated testing, integration testing, performance testing
+- **UAT**: Business validation, stakeholder demos, final testing
+- **Production**: Live application, real user traffic, business operations
+
+## 🔒 **Security & Compliance**
+
+### **Environment Security Levels**
+
+- **Development**: Local secrets, basic authentication
+- **Test**: Azure Key Vault, service principal authentication
+- **UAT**: Production-like security, business user authentication
+- **Production**: Enterprise security, multi-factor authentication
+
+## 📈 **Monitoring & Observability**
+
+### **Environment-Specific Monitoring**
+
+- **Development**: Console logging, basic error tracking
+- **Test**: Application Insights, performance monitoring
+- **UAT**: Business metrics, user behavior tracking
+- **Production**: Enterprise monitoring, SLA tracking
+
+## 🚀 **Deployment Strategies**
+
+### **Blue-Green Deployment**
+
+- Zero-downtime updates
+- Traffic switching between environments
+- Rollback capability
+
+### **Canary Deployment**
+
+- Gradual rollouts
+- Percentage-based traffic distribution
+- Performance monitoring
+
+## 📋 **Environment Checklist**
+
+### **Pre-Deployment**
+
+- Environment variables configured
+- Database migrations ready
+- Secrets updated in Key Vault
+- Terraform configuration validated
+- Monitoring alerts configured
+
+### **Post-Deployment**
+
+- Health checks passed
+- Database connectivity verified
+- API endpoints responding
+- Monitoring dashboards active
+- Performance metrics normal
+
+---
+
+**Remember**: Each environment serves a specific purpose in the software development lifecycle. Use the right environment for the right task to maintain quality, security, and efficiency.
+
+# Environment Management & CI/CD Lifecycle Rules
+
+## 🏗️ **Environment Architecture Overview**
+
+Century 360 uses an optimized AKS-based environment strategy with shared infrastructure and serverless App Service plans for cost-effective resource utilization.
+
+### **Project Architecture Focus**
+
+**⚠️ Important**: This project implements the **frontend/API layer** and **environment infrastructure**, but **NOT** the backend services. We maintain our local PostgreSQL database for development and design APIM contracts with the knowledge that backend services will be implemented separately.
+
+### **Subdomain-Based Environment Architecture**
+
+This project follows a **subdomain-based environment pattern**, treating each environment as a logical subdomain within the enterprise ecosystem:
+
+```
+🌐 app.century360.app          (prd - Production)
+🧪 tst.century360.app          (tst - Testing)
+✅ uat.century360.app          (uat - User Acceptance)
+💻 devbox.century360.app       (devbox - Cloud Dev)
+🏠 localhost:3000              (dev - Local Development)
+```
+
+### **Environment Types**
+
+| Environment | Subdomain             | Purpose             | Infrastructure          | Lifetime       | Cost        | Access                |
+| ----------- | --------------------- | ------------------- | ----------------------- | -------------- | ----------- | --------------------- |
+| **dev**     | localhost:3000        | Local development   | Local Docker            | Persistent     | Minimal     | Developers            |
+| **devbox**  | devbox.century360.app | Cloud development   | App Service Basic       | On-demand      | Low         | Individual developers |
+| **tst**     | tst.century360.app    | Automated testing   | Shared AKS + Serverless | 2-4 hours      | Pay-per-use | CI/CD                 |
+| **uat**     | uat.century360.app    | Business validation | Shared AKS + Serverless | Release cycles | Pay-per-use | Stakeholders          |
+| **prd**     | app.century360.app    | Live application    | Dedicated AKS + Premium | Persistent     | High        | End users             |
+
+## 🚀 **AKS-Based Infrastructure Strategy**
+
+### **Shared Infrastructure Benefits**
+
+- **Cost Optimization**: Shared AKS cluster for tst/uat environments
+- **Serverless Plans**: Pay-per-use App Service plans for test environments
+- **Resource Sharing**: Key Vault, Container Registry, Application Insights shared
+- **Auto-scaling**: Dynamic resource allocation based on demand
+
+### **Terraform-Managed Environments**
+
+```hcl
+# Shared infrastructure for test and UAT environments
+resource "azurerm_kubernetes_cluster" "shared" {
+  name = "century360-shared-cluster"
+  # Single cluster serves both environments
+}
+
+# Serverless App Service Plan
+resource "azurerm_app_service_plan" "shared" {
+  sku {
+    tier = "Dynamic"  # Serverless - pay only for execution time
+    size = "Y1"       # Consumption plan
+  }
+}
+```
+
+## 🔄 **CI/CD Lifecycle Pipeline**
+
+### **Pipeline Stages**
+
+1. **Development Pipeline**: Local development and testing
+2. **Test Environment Pipeline**: AKS-based automated testing
+3. **UAT Pipeline**: Business validation and stakeholder testing
+4. **Production Pipeline**: Live deployment with smoke tests
+
+### **Environment Provisioning**
+
+- **Test Environment**: Temporary VMs (2-4 hour lifetime)
+- **UAT Environment**: Persistent during release cycles
+- **Dev Box**: On-demand cloud development environment
+- **Production**: High-availability dedicated infrastructure
+
+## 📊 **Environment Configuration Management**
+
+### **Environment-Specific Variables**
+
+- **Development**: Local database, development tools, debug mode
+- **Test**: AKS-managed database, integration tools, performance monitoring
+- **UAT**: Production-like database, business tools, full monitoring
+- **Production**: Production database, security-focused, enterprise monitoring
+
+## 🔧 **AKS Infrastructure Patterns**
+
+### **Dynamic Resource Allocation**
+
+```typescript
+interface TestEnvironmentConfig {
+  vmSize: string;
+  nodeCount: number;
+  lifetime: string;
+  testSuite: string;
+}
+
+const testConfigs = {
+  unit: { vmSize: "Standard_D2s_v3", nodeCount: 1, lifetime: "30m" },
+  integration: { vmSize: "Standard_D4s_v3", nodeCount: 3, lifetime: "2h" },
+  e2e: { vmSize: "Standard_D8s_v3", nodeCount: 5, lifetime: "4h" },
+};
+```
+
+## 🎯 **Environment Decision Framework**
+
+### **When to Use Each Environment**
+
+- **Development**: Feature development, local testing, code reviews
+- **Test**: Automated testing, integration testing, performance testing
+- **UAT**: Business validation, stakeholder demos, final testing
+- **Production**: Live application, real user traffic, business operations
+
+## 🔒 **Security & Compliance**
+
+### **Environment Security Levels**
+
+- **Development**: Local secrets, basic authentication
+- **Test**: Azure Key Vault, service principal authentication
+- **UAT**: Production-like security, business user authentication
+- **Production**: Enterprise security, multi-factor authentication
+
+## 📈 **Monitoring & Observability**
+
+### **Environment-Specific Monitoring**
+
+- **Development**: Console logging, basic error tracking
+- **Test**: Application Insights, performance monitoring
+- **UAT**: Business metrics, user behavior tracking
+- **Production**: Enterprise monitoring, SLA tracking
+
+## 🚀 **Deployment Strategies**
+
+### **Blue-Green Deployment**
+
+- Zero-downtime updates
+- Traffic switching between environments
+- Rollback capability
+
+### **Canary Deployment**
+
+- Gradual rollouts
+- Percentage-based traffic distribution
+- Performance monitoring
+
+## 📋 **Environment Checklist**
+
+### **Pre-Deployment**
+
+- Environment variables configured
+- Database migrations ready
+- Secrets updated in Key Vault
+- Terraform configuration validated
+- Monitoring alerts configured
+
+### **Post-Deployment**
+
+- Health checks passed
+- Database connectivity verified
+- API endpoints responding
+- Monitoring dashboards active
+- Performance metrics normal
+
+---
+
+**Remember**: Each environment serves a specific purpose in the software development lifecycle. Use the right environment for the right task to maintain quality, security, and efficiency.

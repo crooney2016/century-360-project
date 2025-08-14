@@ -1,0 +1,215 @@
+---
+alwaysApply: true
+---
+
+# Century 360 Project - Ruleset Index
+
+## 🧠 **Core Cognitive Framework**
+
+Always start with systematic decision-making:
+
+1. **Apply core.mdc** - Cognitive principles (always active)
+2. **Expand context** - Load specific rules based on task type
+3. **Follow root .cursorrules** - For orchestration and project context
+
+## 🎯 **Context Expansion Strategy**
+
+### **Foundation Layer (Always Active)**
+
+- **index.mdc** - Central registry and mental model
+- **core.mdc** - Core cognitive principles and systematic thinking
+
+### **Acceleration Layer (Intelligent Load)**
+
+#### **Development & Code Tasks**
+
+- **build.mdc** - Build, deployment, and CI/CD patterns
+- **ui.mdc** - UI development standards and Chakra UI v2 + SaaS UI v2 patterns
+- **packages.mdc** - Dependency management and package strategies
+- **enterprise.mdc** - Blazity enterprise patterns and server components
+- **puck.mdc** - Puck React page builder implementation and component library
+
+#### **Architecture & Design Tasks**
+
+- **architecture.mdc** - Enterprise architecture and system design
+- **environments.mdc** - Environment management and infrastructure
+- **graph.mdc** - GraphQL, APIM, and API design patterns
+
+#### **Quality & Testing Tasks**
+
+- **testing.mdc** - Testing frameworks and quality assurance
+- **docs.mdc** - Documentation standards and TSDoc patterns
+
+#### **Decision & Strategy Tasks**
+
+- **decision.mdc** - Decision-making framework and enterprise patterns
+
+## 🚀 **Always Apply First**
+
+- Systematic thinking before action
+- Socratic method for problem analysis
+- Enterprise architecture consideration
+- Quality-first development approach
+- User approval required for major changes
+
+## 📋 **Task-Specific Loading**
+
+When you encounter:
+
+- **TypeScript/React**: Load `ui.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Page Builder/Puck**: Load `puck.mdc` + `ui.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Database/API**: Load `graph.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Build/Deployment**: Load `build.mdc` + `environments.mdc`
+- **Testing issues**: Load `testing.mdc` + `enterprise.mdc` + `build.mdc`
+- **Package dependencies**: Load `packages.mdc` + `build.mdc`
+- **Documentation**: Load `docs.mdc` + `ui.mdc`
+- **Architecture decisions**: Load `decision.mdc` + `enterprise.mdc` + `architecture.mdc`
+
+## 🔄 **Re-grounding Protocol**
+
+When the AI gets "stuck" or exceeds response TTL:
+
+1. **Reset to index.mdc** - Return to central mental model
+2. **Re-evaluate task type** - Determine which rules to load
+3. **Expand context intelligently** - Load relevant rule files
+4. **Apply systematic framework** - Use decision-making principles
+5. **Verify understanding** - Confirm approach with user
+
+## 🎯 **Ruleset Application Matrix**
+
+| Task Type                | Primary Rules      | Secondary Rules                                      | Purpose                                        |
+| ------------------------ | ------------------ | ---------------------------------------------------- | ---------------------------------------------- |
+| **Frontend Development** | `ui.mdc`           | `enterprise.mdc`, `architecture.mdc`, `packages.mdc` | UI components, styling, user experience        |
+| **Page Builder**         | `puck.mdc`         | `ui.mdc`, `enterprise.mdc`, `architecture.mdc`       | Puck editor, component library, visual editing |
+| **API Development**      | `graph.mdc`        | `enterprise.mdc`, `architecture.mdc`, `testing.mdc`  | GraphQL schema, resolvers, API design          |
+| **Infrastructure**       | `environments.mdc` | `enterprise.mdc`, `architecture.mdc`, `build.mdc`    | Environment setup, deployment, scaling         |
+| **Testing**              | `testing.mdc`      | `enterprise.mdc`, `build.mdc`, `ui.mdc`              | Test strategy, coverage, quality assurance     |
+| **Build/Deploy**         | `build.mdc`        | `enterprise.mdc`, `environments.mdc`, `packages.mdc` | CI/CD, optimization, deployment                |
+| **Documentation**        | `docs.mdc`         | `enterprise.mdc`, `ui.mdc`, `architecture.mdc`       | Code docs, API docs, guides                    |
+| **Package Management**   | `packages.mdc`     | `enterprise.mdc`, `build.mdc`, `testing.mdc`         | Dependencies, security, updates                |
+| **Architecture**         | `architecture.mdc` | `enterprise.mdc`, `decision.mdc`, `environments.mdc` | System design, patterns, decisions             |
+
+## 🚀 **Flywheel Benefits**
+
+### **Immediate Impact**
+
+- **Clear rule structure** - Every developer knows how rules work
+- **Consistent application** - Rules load automatically based on context
+- **Quality enforcement** - Standards applied systematically
+
+### **Long-term Flywheel Effects**
+
+- **Dev issue reduction** - Rules prevent common mistakes
+- **LLM consistency** - AI follows same patterns every time
+- **Knowledge capture** - Lessons learned become permanent rules
+- **Continuous improvement** - Rules evolve based on observed issues
+
+---
+
+**Remember**: Start with the index, then intelligently expand context based on the specific task requirements. This creates a systematic, momentum-building approach to problem-solving that continuously reduces dev issues and improves LLM coding consistency over time.
+
+# Century 360 Project - Ruleset Index
+
+## 🧠 **Core Cognitive Framework**
+
+Always start with systematic decision-making:
+
+1. **Apply core.mdc** - Cognitive principles (always active)
+2. **Expand context** - Load specific rules based on task type
+3. **Follow root .cursorrules** - For orchestration and project context
+
+## 🎯 **Context Expansion Strategy**
+
+### **Foundation Layer (Always Active)**
+
+- **index.mdc** - Central registry and mental model
+- **core.mdc** - Core cognitive principles and systematic thinking
+
+### **Acceleration Layer (Intelligent Load)**
+
+#### **Development & Code Tasks**
+
+- **build.mdc** - Build, deployment, and CI/CD patterns
+- **ui.mdc** - UI development standards and Chakra UI v2 + SaaS UI v2 patterns
+- **packages.mdc** - Dependency management and package strategies
+- **enterprise.mdc** - Blazity enterprise patterns and server components
+- **puck.mdc** - Puck React page builder implementation and component library
+
+#### **Architecture & Design Tasks**
+
+- **architecture.mdc** - Enterprise architecture and system design
+- **environments.mdc** - Environment management and infrastructure
+- **graph.mdc** - GraphQL, APIM, and API design patterns
+
+#### **Quality & Testing Tasks**
+
+- **testing.mdc** - Testing frameworks and quality assurance
+- **docs.mdc** - Documentation standards and TSDoc patterns
+
+#### **Decision & Strategy Tasks**
+
+- **decision.mdc** - Decision-making framework and enterprise patterns
+
+## 🚀 **Always Apply First**
+
+- Systematic thinking before action
+- Socratic method for problem analysis
+- Enterprise architecture consideration
+- Quality-first development approach
+- User approval required for major changes
+
+## 📋 **Task-Specific Loading**
+
+When you encounter:
+
+- **TypeScript/React**: Load `ui.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Page Builder/Puck**: Load `puck.mdc` + `ui.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Database/API**: Load `graph.mdc` + `enterprise.mdc` + `architecture.mdc`
+- **Build/Deployment**: Load `build.mdc` + `environments.mdc`
+- **Testing issues**: Load `testing.mdc` + `enterprise.mdc` + `build.mdc`
+- **Package dependencies**: Load `packages.mdc` + `build.mdc`
+- **Documentation**: Load `docs.mdc` + `ui.mdc`
+- **Architecture decisions**: Load `decision.mdc` + `enterprise.mdc` + `architecture.mdc`
+
+## 🔄 **Re-grounding Protocol**
+
+When the AI gets "stuck" or exceeds response TTL:
+
+1. **Reset to index.mdc** - Return to central mental model
+2. **Re-evaluate task type** - Determine which rules to load
+3. **Expand context intelligently** - Load relevant rule files
+4. **Apply systematic framework** - Use decision-making principles
+5. **Verify understanding** - Confirm approach with user
+
+## 🎯 **Ruleset Application Matrix**
+
+| Task Type                | Primary Rules      | Secondary Rules                                      | Purpose                                        |
+| ------------------------ | ------------------ | ---------------------------------------------------- | ---------------------------------------------- |
+| **Frontend Development** | `ui.mdc`           | `enterprise.mdc`, `architecture.mdc`, `packages.mdc` | UI components, styling, user experience        |
+| **Page Builder**         | `puck.mdc`         | `ui.mdc`, `enterprise.mdc`, `architecture.mdc`       | Puck editor, component library, visual editing |
+| **API Development**      | `graph.mdc`        | `enterprise.mdc`, `architecture.mdc`, `testing.mdc`  | GraphQL schema, resolvers, API design          |
+| **Infrastructure**       | `environments.mdc` | `enterprise.mdc`, `architecture.mdc`, `build.mdc`    | Environment setup, deployment, scaling         |
+| **Testing**              | `testing.mdc`      | `enterprise.mdc`, `build.mdc`, `ui.mdc`              | Test strategy, coverage, quality assurance     |
+| **Build/Deploy**         | `build.mdc`        | `enterprise.mdc`, `environments.mdc`, `packages.mdc` | CI/CD, optimization, deployment                |
+| **Documentation**        | `docs.mdc`         | `enterprise.mdc`, `ui.mdc`, `architecture.mdc`       | Code docs, API docs, guides                    |
+| **Package Management**   | `packages.mdc`     | `enterprise.mdc`, `build.mdc`, `testing.mdc`         | Dependencies, security, updates                |
+| **Architecture**         | `architecture.mdc` | `enterprise.mdc`, `decision.mdc`, `environments.mdc` | System design, patterns, decisions             |
+
+## 🚀 **Flywheel Benefits**
+
+### **Immediate Impact**
+
+- **Clear rule structure** - Every developer knows how rules work
+- **Consistent application** - Rules load automatically based on context
+- **Quality enforcement** - Standards applied systematically
+
+### **Long-term Flywheel Effects**
+
+- **Dev issue reduction** - Rules prevent common mistakes
+- **LLM consistency** - AI follows same patterns every time
+- **Knowledge capture** - Lessons learned become permanent rules
+- **Continuous improvement** - Rules evolve based on observed issues
+
+---
+
+**Remember**: Start with the index, then intelligently expand context based on the specific task requirements. This creates a systematic, momentum-building approach to problem-solving that continuously reduces dev issues and improves LLM coding consistency over time.

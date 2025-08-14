@@ -1,0 +1,27 @@
+{
+  "directory": [
+    "src/ui",
+    "src/icons",
+    "src/components/atoms",
+    "src/components/molecules",
+    "src/components/organisms",
+    "src/components/admin",
+    "src/components/layout",
+    "src/components/ui"
+  ],
+  "delete": true,
+  "exclude": [
+    "node_modules",
+    "src/app",
+    "src/pages",
+    "public",
+    "scripts",
+    "prisma",
+    "tests",
+    "**/*.stories.*"
+  ],
+  "barrelName": "index",
+  "structure": "flat",
+  "quoteCharacter": "\"",
+  "semicolons": true
+}

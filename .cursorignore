@@ -1,0 +1,46 @@
+# Dependencies and build artifacts
+node_modules/
+.next/
+.git/
+coverage/
+dist/
+build/
+out/
+.vercel/
+
+# Generated files and documentation
+src/generated/
+prisma/migrations/
+docs/ui/
+public/typedoc/
+*.tsbuildinfo
+next-env.d.ts
+
+# Large data files (allow CSVs for seeding)
+terminal-output.html
+
+# Logs and debug files
+*.log
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.pem
+
+# Package manager files
+.pnp/
+.pnp.*
+.yarn/
+pnpm-lock.yaml
+
+# IDE and extension files
+.vscode/settings.json
+
+# Ensure env files are visible to Cursor tools
+!.env
+!.env.*
+!.env.local

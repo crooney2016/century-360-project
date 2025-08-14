@@ -1,0 +1,81 @@
+{
+  "folders": [
+    {
+      "name": "Century 360 Project",
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "cursor.ai.systemPrompt": "You are an AI assistant for the Century 360 project. ALWAYS start by loading the .cursor/rules/index.mdc file first, then intelligently expand your context by loading specific rule files based on the task type. Follow the systematic decision framework and apply enterprise architecture patterns. Never skip the index - it's your entry point to understanding the project's cognitive framework.",
+    "cursor.ai.contextStrategy": "index-first",
+    "cursor.ai.ruleLoading": {
+      "alwaysLoad": [".cursor/rules/index.mdc", ".cursor/rules/core.mdc"],
+      "intelligentLoad": {
+        "code": [
+          ".cursor/rules/build.mdc",
+          ".cursor/rules/ui.mdc",
+          ".cursor/rules/architecture.mdc",
+        ],
+        "documentation": [".cursor/rules/docs.mdc"],
+        "testing": [".cursor/rules/testing.mdc", ".cursor/rules/build.mdc"],
+        "packages": [".cursor/rules/packages.mdc"],
+        "decisions": [".cursor/rules/decision.mdc"],
+      },
+    },
+    "cursor.ai.workspace": {
+      "rulesDirectory": ".cursor/rules",
+      "indexFile": "index.mdc",
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "emmet.includeLanguages": {
+      "typescript": "html",
+      "typescriptreact": "html",
+    },
+    // Completely disable Microsoft Edge Tools and webhint
+    "edge-devtools.webhint": false,
+    "edge-devtools.network": false,
+    "edge-devtools.console": false,
+    "edge-devtools.enabled": false,
+    "webhint.enable": false,
+    "webhint.enableTelemetry": false,
+    "vscode-edge-devtools.webhint": false,
+    "vscode-edge-devtools.headless": false,
+    // Hide Microsoft Edge Tools diagnostics
+    "problems.decorations.enabled": true,
+    "problems.showCurrentInStatus": true,
+    "typescript.surveys.enabled": false,
+    "extensions.ignoreRecommendations": true,
+    // Disable specific linting sources
+    "html.validate.styles": false,
+    "css.validate": false,
+    // Completely suppress Microsoft Edge Tools diagnostics
+    "problems.sortOrder": "severity",
+    "problems.filteredTypes": ["Microsoft Edge Tools"],
+    // Disable all Edge DevTools related features
+    "vscode-edge-devtools.mirrorEdits": false,
+    "vscode-edge-devtools.useHttps": false,
+    // Suppress webhint entirely
+    "webhint.disableHint": ["no-inline-styles", "axe", "axe/aria"],
+    "webhint.formatter": "summary",
+    "WillLuke.nextjs.addTypesOnSave": true,
+    "WillLuke.nextjs.hasPrompted": true,
+    "editor.codeActions.triggerOnFocusChange": true,
+    "files.autoSave": "onFocusChange",
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next",
+      "unifiedjs.vscode-mdx",
+      "ms-vscode.vscode-json",
+      "ms-playwright.playwright",
+    ],
+    "unwantedRecommendations": ["ms-edgedevtools.vscode-edge-devtools", "webhint.vscode-webhint"],
+  },
+}

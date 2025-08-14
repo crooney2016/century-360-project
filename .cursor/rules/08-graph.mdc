@@ -1,0 +1,617 @@
+# GraphQL & API Design - Century 360 Project
+
+## 🔗 **GraphQL Architecture**
+
+### **Schema-First Design**
+
+#### **Schema Definition Principles**
+- **Type Safety** - Strong typing for all data structures
+- **Documentation** - Self-documenting API with descriptions
+- **Validation** - Built-in input validation and error handling
+- **Evolution** - Backward-compatible schema changes
+
+#### **Schema Organization**
+```graphql
+# Core types
+type User {
+  id: ID!
+  email: String!
+  profile: UserProfile
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# Input types for mutations
+input CreateUserInput {
+  email: String!
+  password: String!
+  profile: UserProfileInput
+}
+
+# Query operations
+type Query {
+  user(id: ID!): User
+  users(first: Int, after: String): UserConnection!
+}
+
+# Mutation operations
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+}
+```
+
+## **Resolver Pattern**
+
+### **Resolver Structure**
+```typescript
+// User resolver
+const userResolvers = {
+  Query: {
+    user: async (_, { id }, { prisma, user }) => {
+      // Authorization check
+      if (!user) throw new AuthenticationError('Not authenticated');
+
+      // Data fetching
+      const userData = await prisma.user.findUnique({
+        where: { id },
+        include: { profile: true }
+      });
+
+      if (!userData) throw new NotFoundError('User not found');
+
+      return userData;
+    }
+  },
+
+  User: {
+    profile: async (parent, _, { prisma }) => {
+      return await prisma.userProfile.findUnique({
+        where: { userId: parent.id }
+      });
+    }
+  }
+};
+```
+
+#### **Resolver Best Practices**
+- **Single Responsibility** - Each resolver does one thing well
+- **Error Handling** - Consistent error responses
+- **Authorization** - Check permissions before data access
+- **Data Loading** - Efficient database queries
+- **Caching** - Implement field-level caching
+
+## 🚀 **Performance Optimization**
+
+### **Batch Operations**
+
+#### **DataLoader Pattern**
+```typescript
+import DataLoader from 'dataloader';
+
+// User profile loader
+const userProfileLoader = new DataLoader(async (userIds: string[]) => {
+  const profiles = await prisma.userProfile.findMany({
+    where: { userId: { in: userIds } }
+  });
+
+  // Return in same order as requested
+  return userIds.map(id =>
+    profiles.find(profile => profile.userId === id)
+  );
+});
+
+// Resolver using DataLoader
+const userResolvers = {
+  User: {
+    profile: async (parent) => {
+      return userProfileLoader.load(parent.id);
+    }
+  }
+};
+```
+
+#### **Query Optimization**
+- **Field Selection** - Only fetch requested fields
+- **Connection Pattern** - Efficient pagination with cursors
+- **Nested Queries** - Minimize N+1 query problems
+- **Query Complexity** - Limit query depth and complexity
+
+### **Caching Strategy**
+
+#### **Apollo Client Caching**
+```typescript
+// Field-level cache policies
+const cache = new InMemoryCache({
+  typePolicies: {
+    User: {
+      fields: {
+        profile: {
+          merge(existing, incoming) {
+            return incoming; // Always use latest
+          }
+        }
+      }
+    }
+  }
+});
+
+// Cache field policies
+const cachePolicies = {
+  User: {
+    keyFields: ['id'],
+    fields: {
+      fullName: {
+        read(existing, { readField }) {
+          const firstName = readField('firstName');
+          const lastName = readField('lastName');
+          return `${firstName} ${lastName}`;
+        }
+      }
+    }
+  }
+};
+```
+
+## 🔐 **Authentication & Authorization**
+
+### **JWT Token Management**
+
+#### **Token Structure**
+```typescript
+interface JWTPayload {
+  userId: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
+  exp: number;
+  iat: number;
+}
+
+// Token validation middleware
+const authenticateUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) throw new AuthenticationError('No token provided');
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    throw new AuthenticationError('Invalid token');
+  }
+};
+```
+
+#### **Role-Based Access Control**
+```typescript
+// Permission checking
+const requirePermission = (permission: string) => {
+  return (next) => async (parent, args, context) => {
+    const { user } = context;
+
+    if (!user) throw new AuthenticationError('Not authenticated');
+
+    if (!user.permissions.includes(permission)) {
+      throw new ForbiddenError('Insufficient permissions');
+    }
+
+    return next(parent, args, context);
+  };
+};
+
+// Usage in resolver
+const userResolvers = {
+  Mutation: {
+    deleteUser: requirePermission('user:delete')(
+      async (_, { id }, { prisma, user }) => {
+        // Delete user logic
+      }
+    )
+  }
+};
+```
+
+## 📊 **Error Handling & Validation**
+
+### **GraphQL Error Types**
+
+#### **Custom Error Classes**
+```typescript
+class ValidationError extends GraphQLError {
+  constructor(message: string, field?: string) {
+    super(message, {
+      extensions: {
+        code: 'VALIDATION_ERROR',
+        field,
+        http: { status: 400 }
+      }
+    });
+  }
+}
+
+class BusinessLogicError extends GraphQLError {
+  constructor(message: string, code: string) {
+    super(message, {
+      extensions: {
+        code,
+        http: { status: 422 }
+      }
+    });
+  }
+}
+```
+
+#### **Error Response Format**
+```typescript
+// Consistent error structure
+interface GraphQLErrorResponse {
+  message: string;
+  code: string;
+  field?: string;
+  details?: Record<string, any>;
+  timestamp: string;
+  requestId: string;
+}
+
+// Error handling middleware
+const errorHandler = (error: GraphQLError) => {
+  const response: GraphQLErrorResponse = {
+    message: error.message,
+    code: error.extensions?.code || 'INTERNAL_ERROR',
+    field: error.extensions?.field,
+    details: error.extensions?.details,
+    timestamp: new Date().toISOString(),
+    requestId: error.extensions?.requestId
+  };
+
+  return response;
+};
+```
+
+### **Input Validation**
+
+#### **Schema Validation**
+```typescript
+import { z } from 'zod';
+
+// User input validation
+const CreateUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  profile: z.object({
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required')
+  }).optional()
+});
+
+// Validation in resolver
+const createUser = async (_, { input }, { prisma }) => {
+  try {
+    const validatedInput = CreateUserSchema.parse(input);
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: validatedInput.email }
+    });
+
+    if (existingUser) {
+      throw new BusinessLogicError('User already exists', 'USER_EXISTS');
+    }
+
+    // Create user
+    return await prisma.user.create({
+      data: {
+        email: validatedInput.email,
+        password: await hashPassword(validatedInput.password),
+        profile: validatedInput.profile ? {
+          create: validatedInput.profile
+        } : undefined
+      },
+      include: { profile: true }
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError('Invalid input data', error.errors[0].path.join('.'));
+    }
+    throw error;
+  }
+};
+```
+
+## 🔄 **Pagination & Filtering**
+
+### **Cursor-Based Pagination**
+
+#### **Connection Pattern**
+```graphql
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserEdge {
+  node: User!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+```
+
+#### **Pagination Implementation**
+```typescript
+const createConnection = <T>(
+  items: T[],
+  cursorField: keyof T,
+  limit: number,
+  cursor?: string
+) => {
+  let filteredItems = items;
+
+  if (cursor) {
+    const cursorIndex = items.findIndex(item =>
+      item[cursorField] === cursor
+    );
+    filteredItems = items.slice(cursorIndex + 1);
+  }
+
+  const edges = filteredItems.slice(0, limit).map(item => ({
+    node: item,
+    cursor: item[cursorField]
+  }));
+
+  const hasNextPage = filteredItems.length > limit;
+  const hasPreviousPage = !!cursor;
+
+  return {
+    edges,
+    pageInfo: {
+      hasNextPage,
+      hasPreviousPage,
+      startCursor: edges[0]?.cursor,
+      endCursor: edges[edges.length - 1]?.cursor
+    },
+    totalCount: items.length
+  };
+};
+```
+
+### **Filtering & Sorting**
+
+#### **Filter Implementation**
+```typescript
+interface UserFilters {
+  email?: string;
+  role?: string;
+  createdAt?: {
+    gte?: Date;
+    lte?: Date;
+  };
+  search?: string;
+}
+
+const buildUserWhere = (filters: UserFilters) => {
+  const where: any = {};
+
+  if (filters.email) {
+    where.email = { contains: filters.email, mode: 'insensitive' };
+  }
+
+  if (filters.role) {
+    where.role = filters.role;
+  }
+
+  if (filters.createdAt) {
+    where.createdAt = {};
+    if (filters.createdAt.gte) where.createdAt.gte = filters.createdAt.gte;
+    if (filters.createdAt.lte) where.createdAt.lte = filters.createdAt.lte;
+  }
+
+  if (filters.search) {
+    where.OR = [
+      { email: { contains: filters.search, mode: 'insensitive' } },
+      { profile: { firstName: { contains: filters.search, mode: 'insensitive' } } },
+      { profile: { lastName: { contains: filters.search, mode: 'insensitive' } } }
+    ];
+  }
+
+  return where;
+};
+```
+
+## 🚀 **Azure API Management Integration**
+
+### **APIM Configuration**
+
+#### **API Gateway Setup**
+```yaml
+# APIM API definition
+openapi: 3.0.1
+info:
+  title: Century 360 GraphQL API
+  version: 1.0.0
+  description: Enterprise GraphQL API for Century 360 platform
+
+servers:
+  - url: https://api.century360.app
+    description: Production server
+  - url: https://tst-api.century360.app
+    description: Test server
+
+paths:
+  /graphql:
+    post:
+      summary: GraphQL endpoint
+      operationId: graphql
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                variables:
+                  type: object
+                operationName:
+                  type: string
+      responses:
+        '200':
+          description: Successful GraphQL response
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+```
+
+## **APIM Policies**
+```xml
+<!-- JWT validation policy -->
+<validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Invalid or expired token">
+    <openid-config url="https://login.microsoftonline.com/{tenant-id}/v2.0/.well-known/openid_configuration" />
+    <required-claims>
+        <claim name="aud" match="all">
+            <value>{api-client-id}</value>
+        </claim>
+    </required-claims>
+</validate-jwt>
+
+<!-- Rate limiting policy -->
+<rate-limit calls="100" renewal-period="60" />
+<quota calls="1000" renewal-period="3600" />
+
+<!-- CORS policy -->
+<cors>
+    <allowed-origins>
+        <origin>https://app.century360.app</origin>
+        <origin>https://tst.century360.app</origin>
+        <origin>https://uat.century360.app</origin>
+    </allowed-origins>
+    <allowed-methods>
+        <method>POST</method>
+        <method>OPTIONS</method>
+    </allowed-methods>
+    <allowed-headers>
+        <header>Content-Type</header>
+        <header>Authorization</header>
+    </allowed-headers>
+</cors>
+```
+
+### **Event-Driven Integration**
+
+#### **Event Grid Integration**
+```typescript
+// Event publishing
+const publishEvent = async (eventType: string, data: any) => {
+  const event = {
+    id: generateId(),
+    eventType,
+    subject: `century360/${eventType}`,
+    eventTime: new Date().toISOString(),
+    dataVersion: '1.0',
+    data
+  };
+
+  await fetch(process.env.EVENT_GRID_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'aeg-sas-key': process.env.EVENT_GRID_KEY
+    },
+    body: JSON.stringify([event])
+  });
+};
+
+// Usage in resolvers
+const createUser = async (_, { input }, { prisma }) => {
+  const user = await prisma.user.create({
+    data: input,
+    include: { profile: true }
+  });
+
+  // Publish user created event
+  await publishEvent('UserCreated', {
+    userId: user.id,
+    email: user.email,
+    timestamp: new Date().toISOString()
+  });
+
+  return user;
+};
+```
+
+## 📈 **Performance Monitoring**
+
+### **Query Performance Tracking**
+
+#### **Apollo Studio Integration**
+```typescript
+// Apollo Studio configuration
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    ApolloServerPluginUsageReporting({
+      sendVariableValues: { all: true },
+      sendHeaders: { all: true }
+    }),
+    ApolloServerPluginLandingPageGraphQLPlayground()
+  ],
+  context: ({ req }) => ({
+    user: req.user,
+    prisma,
+    requestId: req.headers['x-request-id']
+  })
+});
+```
+
+#### **Custom Performance Metrics**
+```typescript
+// Resolver timing
+const withTiming = (resolverName: string) => {
+  return (next) => async (parent, args, context) => {
+    const start = Date.now();
+
+    try {
+      const result = await next(parent, args, context);
+      const duration = Date.now() - start;
+
+      // Log performance metrics
+      console.log(`Resolver ${resolverName} took ${duration}ms`);
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - start;
+      console.error(`Resolver ${resolverName} failed after ${duration}ms:`, error);
+      throw error;
+    }
+  };
+};
+
+// Usage
+const userResolvers = {
+  Query: {
+    user: withTiming('user')(async (_, { id }, { prisma, user }) => {
+      // User resolver logic
+    })
+  }
+};
+```
+
+---
+
+**Remember**: GraphQL is a powerful tool for building efficient, type-safe APIs. Focus on performance, security, and developer experience while maintaining clear contracts and comprehensive error handling.
+description:
+globs:
+alwaysApply: false
+---

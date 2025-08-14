@@ -1,0 +1,17 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main V shape -->
+  <path d="M8 32L20 8L32 32H28L20 16L12 32H8Z" fill="#0EA5E9"/>
+  
+  <!-- Inner accent -->
+  <path d="M20 12L26 28H14L20 12Z" fill="white"/>
+  
+  <!-- Optional: subtle shadow for depth -->
+  <path d="M8 32L20 8L32 32H28L20 16L12 32H8Z" fill="url(#shadow)" opacity="0.1"/>
+  
+  <defs>
+    <linearGradient id="shadow" x1="20" y1="8" x2="20" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#0369A1"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,8 @@
+.next
+node_modules
+public/typedoc
+public/typedoc-embed.html
+docs/temp/**
+docs/drafts/**
+
+prisma/seed.ts

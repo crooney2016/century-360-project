@@ -1,0 +1,22 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    "ms-vscode.vscode-markdown",
+    "ms-vscode.vscode-yaml",
+    "ms-vscode.vscode-css",
+    "ms-vscode.vscode-html",
+    "ms-vscode.vscode-javascript",
+    "ms-vscode.vscode-typescript",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    "ms-vscode.vscode-markdown",
+    "ms-vscode.vscode-yaml",
+    "ms-vscode.vscode-css",
+    "ms-vscode.vscode-html",
+    "ms-vscode.vscode-javascript",
+    "ms-vscode.vscode-typescript"
+  ]
+}

@@ -1,0 +1,50 @@
+@layer components {
+  .container-app {
+    @apply container mx-auto px-4;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl px-3 py-1.5 text-sm font-medium transition-shadow focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  .btn--primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-600;
+  }
+  .btn--secondary {
+    @apply bg-gray-900 text-white hover:bg-black focus:ring-gray-900;
+  }
+  .btn--outline {
+    @apply border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 focus:ring-gray-400;
+  }
+  .btn--ghost {
+    @apply bg-transparent text-gray-900 hover:bg-gray-100 focus:ring-gray-400;
+  }
+  .btn--link {
+    @apply bg-transparent p-0 text-blue-700 hover:underline focus:ring-blue-600;
+  }
+  .btn--sm {
+    @apply h-7 rounded-lg px-2.5 text-xs;
+  }
+  .btn--md {
+    @apply h-8;
+  }
+  .btn--lg {
+    @apply h-10 text-base;
+  }
+  .btn--block {
+    @apply w-full;
+  }
+
+  .navlink {
+    @apply rounded px-3 py-2 text-sm text-gray-800 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600;
+  }
+  .navlink--active {
+    @apply bg-gray-900 text-white hover:text-white;
+  }
+
+  .card {
+    @apply rounded-2xl border bg-white shadow-sm;
+  }
+  .card__body {
+    @apply p-4;
+  }
+}

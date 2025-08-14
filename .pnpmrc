@@ -1,0 +1,32 @@
+# pnpm Security Configuration
+
+# Prevent hoisting of dependencies (better security)
+shamefully-hoist=false
+
+# Use frozen lockfile for reproducible builds
+prefer-frozen-lockfile=true
+frozen-lockfile=true
+
+# Strict peer dependency resolution
+strict-peer-dependencies=true
+
+# Auto-install peer dependencies
+auto-install-peers=true
+
+# Security audit settings
+audit-level=moderate
+
+# Disable funding messages
+fund=false
+
+# Enable audit by default
+audit=true
+
+# Use exact versions for better security
+save-exact=true
+
+# Prevent accidental publishing
+private=true
+
+# Use workspace protocol for internal packages
+link-workspace-packages=true

@@ -1,0 +1,33 @@
+/* Base styles for Chakra UI v3 design tokens */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-feature-settings: "kern";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+/* Chakra UI color mode integration */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html:not(.dark) body {
+  background-color: rgb(249 250 251);
+  color: rgb(17 24 39);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: rgb(3 7 18);
+  color: rgb(243 244 246);
+}

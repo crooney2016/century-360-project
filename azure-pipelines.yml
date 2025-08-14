@@ -1,0 +1,179 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - docs/*
+      - README.md
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+schedules:
+  - cron: "0 2 * * 0" # Weekly on Sundays at 2 AM UTC
+    displayName: Weekly Security Scan
+    branches:
+      include:
+        - main
+    always: true
+
+variables:
+  nodeVersion: "20.x"
+  pnpmVersion: "10.14.0"
+
+stages:
+  - stage: Security
+    displayName: "Security Scanning"
+    jobs:
+      - job: SecurityAudit
+        displayName: "Security Audit"
+        pool:
+          vmImage: "ubuntu-latest"
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node.js"
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: |
+              npm install -g pnpm@$(pnpmVersion)
+            displayName: "Install pnpm"
+
+          - script: |
+              pnpm install --frozen-lockfile
+            displayName: "Install dependencies"
+
+          - script: |
+              pnpm security:audit
+            displayName: "Run security audit"
+            continueOnError: true
+
+          - script: |
+              pnpm security:outdated
+            displayName: "Check outdated packages"
+            continueOnError: true
+
+          - script: |
+              pnpm security:licenses
+            displayName: "Check package licenses"
+            continueOnError: true
+
+          - task: PublishTestResults@2
+            displayName: "Publish security results"
+            inputs:
+              testResultsFormat: "JUnit"
+              testResultsFiles: "**/security-results.xml"
+              mergeTestResults: true
+              testRunTitle: "Security Scan Results"
+            condition: always()
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish security reports"
+            inputs:
+              pathToPublish: "security-reports/"
+              artifactName: "security-reports"
+              publishLocation: "Container"
+            condition: always()
+
+  - stage: Build
+    displayName: "Build & Test"
+    dependsOn: Security
+    condition: succeeded()
+    jobs:
+      - job: BuildAndTest
+        displayName: "Build and Test"
+        pool:
+          vmImage: "ubuntu-latest"
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node.js"
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: |
+              npm install -g pnpm@$(pnpmVersion)
+            displayName: "Install pnpm"
+
+          - script: |
+              pnpm install --frozen-lockfile
+            displayName: "Install dependencies"
+
+          - script: |
+              pnpm format:check
+            displayName: "Check code formatting"
+
+          - script: |
+              pnpm lint:strict
+            displayName: "Run linting"
+
+          - script: |
+              pnpm typecheck
+            displayName: "Type checking"
+
+          - script: |
+              pnpm test
+            displayName: "Run unit tests"
+
+          - script: |
+              pnpm test:coverage
+            displayName: "Generate test coverage"
+
+          - script: |
+              pnpm build
+            displayName: "Build application"
+
+          - task: PublishTestResults@2
+            displayName: "Publish test results"
+            inputs:
+              testResultsFormat: "JUnit"
+              testResultsFiles: "**/test-results.xml"
+              mergeTestResults: true
+              testRunTitle: "Test Results"
+            condition: always()
+
+          - task: PublishCodeCoverageResults@1
+            displayName: "Publish coverage results"
+            inputs:
+              codeCoverageTool: "Cobertura"
+              summaryFileLocation: "**/coverage/cobertura-coverage.xml"
+              reportDirectory: "**/coverage/"
+            condition: always()
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish build artifacts"
+            inputs:
+              pathToPublish: ".next/"
+              artifactName: "build-artifacts"
+              publishLocation: "Container"
+
+  - stage: Deploy
+    displayName: "Deploy"
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployToProduction
+        displayName: "Deploy to Production"
+        environment: "production"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: build-artifacts
+
+                - script: |
+                    echo "Deploying to production..."
+                    # Add your deployment steps here
+                  displayName: "Deploy application"
+
+                - script: |
+                    echo "Running post-deployment security check..."
+                    pnpm security:check
+                  displayName: "Post-deployment security check"

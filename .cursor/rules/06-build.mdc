@@ -1,0 +1,39 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+Consistent build, validation, and CI flow using pnpm for Next.js 15 + GraphQL + Prisma.
+
+### Local Workflow
+
+- Format → Lint → Typecheck → Codegen → Build → Dev
+- Commands:
+  - `pnpm format:write` (and docs fixers as needed)
+  - `pnpm lint` (max-warnings=0)
+  - `pnpm typecheck`
+  - `pnpm graphql:codegen`
+  - `pnpm barrels`
+  - `pnpm build`
+  - `pnpm dev` (only when explicitly requested; do not auto-start)
+
+### GraphQL & Prisma Pipeline
+
+- Run `pnpm prisma:generate` and `pnpm graphql:codegen` before build in pipelines.
+- Use `pnpm build:pipeline` for CI-safe builds (no lint reruns).
+
+### Testing
+
+- Unit/Integration: `pnpm test` or targeted scripts under `tests/`.
+- E2E: `pnpm test:e2e` using Playwright. Prefer Chromium generic browser.
+
+### CI Enforcement
+
+- No warnings allowed in lint. Type errors fail the pipeline.
+- Use `pnpm validate` (format:check, lint, typecheck) prior to running tests.
+
+### Artefacts & Caching
+
+- Ignore `.next/**`, generated folders, and `public/typedoc/**` in lint.
+- Cache pnpm store between CI steps. Keep Node version pinned in workflows.

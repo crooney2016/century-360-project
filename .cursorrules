@@ -1,0 +1,41 @@
+# Century 360 Project - Global Cursor Rules
+
+## 🧠 **Rule Loading Strategy**
+
+1. **Always load first**: `.cursor/rules/02-index.mdc`
+2. **Expand context**: Load specific rules based on task type
+3. **Apply systematically**: Follow the cognitive framework
+
+## 🎯 **Task-Specific Loading**
+
+- **Frontend/UI**: Load `ui.mdc` + `puck.mdc`
+- **Architecture**: Load `architecture.mdc` + `enterprise.mdc`
+- **Testing**: Load `testing.mdc` + `build.mdc`
+- **Packages**: Load `packages.mdc` + `build.mdc`
+- **Page Builder**: Load `ui.mdc` + `enterprise.mdc` + `architecture.mdc`
+
+## 🚀 **Core Principles**
+
+- Systematic thinking before action
+- Enterprise architecture patterns
+- Quality-first development
+- User approval for major changes
+- Chakra UI v2 + SAAS-UI v2 patterns
+- Puck React page builder with glassmorphism
+
+## 📋 **Project Context**
+
+- **Next.js 15** with App Router
+- **Chakra UI v2** + **SAAS-UI v2** with glass theme
+- **Puck React page builder** for visual content editing
+- **Enterprise architecture** with AKS-based environments
+- **GraphQL API** gateway with Prisma ORM
+- **Atomic design** system (atoms/molecules/organisms)
+
+## 🔄 **Rule Application Flow**
+
+1. **Load index.mdc** - Central rule registry
+2. **Identify task type** - Frontend, API, Testing, etc.
+3. **Load relevant rules** - Based on task requirements
+4. **Apply systematically** - Follow enterprise patterns
+5. **Verify approach** - Confirm with user before major changes

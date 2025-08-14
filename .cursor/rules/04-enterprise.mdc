@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+---
+
+### Purpose
+
+Codify Blazity-style enterprise patterns: RSC-first, domain boundaries, high cohesion/low coupling, and production-readiness.
+
+### Domain-Driven Structure
+
+- Organize features by domain (e.g., `Product 360`, `Admin`, `Customers`).
+- Place UI in `components/` and business rules in `lib/` or `graphql/`.
+- Keep GraphQL resolvers thin; call services that encapsulate Prisma access.
+
+### RSC + Client Island Pattern
+
+- Default to server components; elevate to client only for interactivity.
+- Isolate client components to small, testable units; pass plain data props from RSC.
+
+### API Contracts
+
+- Back all cross-surface data with GraphQL. Use generated TS types end-to-end.
+- Version-breaking changes require an ADR and user approval.
+
+### Reliability & Quality
+
+- Zero ESLint warnings (CI enforced). Strong TS types. TSDoc for public APIs.
+- Tests: unit (Vitest), integration (RTL), e2e (Playwright). Critical paths must be covered.
+
+### Observability & Ops
+
+- Log resolver timings and key events. Add request correlation IDs.
+- Health endpoints: `graphql.health` and app-level checks in `lib/health-monitor.ts`.
+
+### Accessibility & UX
+
+- Follow Chakra/SaaS UI accessibility defaults; provide roles/labels where needed.
+- Responsive by default. Respect reduced motion settings in animations.
+
+### Security
+
+- Input validation at resolver boundaries (`zod`).
+- Enforce RBAC/permissions before data access when applicable.
+- No secrets in client bundles. Use envs and Azure Key Vault for production.
+
+### Performance
+
+- Cursor pagination for large lists; avoid offset pagination for big tables.
+- Batch with DataLoader where N+1 emerges.
+- Use `revalidate` and targeted cache invalidation post-mutations.
+
+### Change Management
+
+- Major upgrades (e.g., framework or UI library) occur in a forked repo branch and merge after full validation.
+- Every architectural change requires a short ADR entry (see `13-decision.mdc`).

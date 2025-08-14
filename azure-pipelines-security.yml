@@ -1,0 +1,229 @@
+trigger: none
+
+pr: none
+
+schedules:
+  - cron: "0 2 * * 0" # Weekly on Sundays at 2 AM UTC
+    displayName: Weekly Security Scan
+    branches:
+      include:
+        - main
+    always: true
+
+variables:
+  nodeVersion: "20.x"
+  pnpmVersion: "10.14.0"
+  securityScanTimeout: "30m"
+
+stages:
+  - stage: SecurityScan
+    displayName: "Comprehensive Security Scan"
+    jobs:
+      - job: DependencySecurity
+        displayName: "Dependency Security Audit"
+        pool:
+          vmImage: "ubuntu-latest"
+        timeoutInMinutes: 30
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node.js"
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: |
+              npm install -g pnpm@$(pnpmVersion)
+            displayName: "Install pnpm"
+
+          - script: |
+              pnpm install --frozen-lockfile
+            displayName: "Install dependencies"
+
+          - script: |
+              echo "Running comprehensive security audit..."
+              pnpm security:audit --audit-level=moderate > security-audit.txt 2>&1
+              echo "Audit completed with exit code: $?"
+              cat security-audit.txt
+            displayName: "Security Audit"
+            continueOnError: true
+
+          - script: |
+              echo "Checking for outdated packages..."
+              pnpm security:outdated > outdated-packages.txt 2>&1
+              echo "Outdated check completed with exit code: $?"
+              cat outdated-packages.txt
+            displayName: "Outdated Packages Check"
+            continueOnError: true
+
+          - script: |
+              echo "Verifying package licenses..."
+              pnpm security:licenses > license-report.txt 2>&1
+              echo "License check completed with exit code: $?"
+              cat license-report.txt
+            displayName: "License Compliance Check"
+            continueOnError: true
+
+          - script: |
+              echo "Installing OWASP Dependency Check..."
+              wget -qO- https://github.com/jeremylong/DependencyCheck/releases/latest/download/dependency-check-8.4.0-release.zip | unzip -q -
+              echo "Running OWASP scan..."
+              ./dependency-check/bin/dependency-check.sh --scan ./src --format HTML --out ./security-reports --failOnCVSS 7 --log ./security-reports/owasp-scan.log
+              echo "OWASP scan completed with exit code: $?"
+            displayName: "OWASP Dependency Check"
+            continueOnError: true
+
+          - script: |
+              echo "Installing Trivy..."
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+              echo "Running Trivy scan..."
+              trivy fs --security-checks vuln --format json --output security-reports/trivy-scan.json .
+              echo "Trivy scan completed with exit code: $?"
+            displayName: "Trivy Vulnerability Scan"
+            continueOnError: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Security Reports"
+            inputs:
+              pathToPublish: "security-reports/"
+              artifactName: "security-reports-$(Build.BuildId)"
+              publishLocation: "Container"
+            condition: always()
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Security Logs"
+            inputs:
+              pathToPublish: "*.txt"
+              artifactName: "security-logs-$(Build.BuildId)"
+              publishLocation: "Container"
+            condition: always()
+
+      - job: CodeSecurity
+        displayName: "Code Security Analysis"
+        pool:
+          vmImage: "ubuntu-latest"
+        timeoutInMinutes: 20
+
+        steps:
+          - task: NodeTool@0
+            displayName: "Install Node.js"
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: |
+              npm install -g pnpm@$(pnpmVersion)
+            displayName: "Install pnpm"
+
+          - script: |
+              pnpm install --frozen-lockfile
+            displayName: "Install dependencies"
+
+          - script: |
+              echo "Running ESLint security rules..."
+              pnpm lint:strict > code-security.txt 2>&1
+              echo "ESLint security check completed with exit code: $?"
+              cat code-security.txt
+            displayName: "ESLint Security Rules"
+            continueOnError: true
+
+          - script: |
+              echo "Installing SonarQube Scanner..."
+              wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+              unzip -q sonar-scanner-cli-4.8.0.2856-linux.zip
+              echo "Running SonarQube analysis..."
+              ./sonar-scanner-4.8.0.2856-linux/bin/sonar-scanner \
+                -Dsonar.projectKey=century-360-project \
+                -Dsonar.sources=src \
+                -Dsonar.host.url=$(SONAR_HOST_URL) \
+                -Dsonar.login=$(SONAR_TOKEN) \
+                -Dsonar.qualitygate.wait=true
+              echo "SonarQube analysis completed with exit code: $?"
+            displayName: "SonarQube Code Analysis"
+            continueOnError: true
+            env:
+              SONAR_HOST_URL: $(sonarHostUrl)
+              SONAR_TOKEN: $(sonarToken)
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Code Security Reports"
+            inputs:
+              pathToPublish: "*.txt"
+              artifactName: "code-security-reports-$(Build.BuildId)"
+              publishLocation: "Container"
+            condition: always()
+
+      - job: ContainerSecurity
+        displayName: "Container Security Scan"
+        pool:
+          vmImage: "ubuntu-latest"
+        timeoutInMinutes: 15
+
+        steps:
+          - script: |
+              echo "Installing Trivy for container scanning..."
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+              echo "Scanning for container vulnerabilities..."
+              trivy image --security-checks vuln,config --format json --output container-security.json postgres:15
+              echo "Container scan completed with exit code: $?"
+            displayName: "Container Vulnerability Scan"
+            continueOnError: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Container Security Report"
+            inputs:
+              pathToPublish: "container-security.json"
+              artifactName: "container-security-$(Build.BuildId)"
+              publishLocation: "Container"
+            condition: always()
+
+  - stage: SecurityReport
+    displayName: "Security Report Generation"
+    dependsOn: SecurityScan
+    condition: always()
+    jobs:
+      - job: GenerateReport
+        displayName: "Generate Security Report"
+        pool:
+          vmImage: "ubuntu-latest"
+
+        steps:
+          - download: current
+            artifact: "security-reports-*"
+
+          - download: current
+            artifact: "security-logs-*"
+
+          - download: current
+            artifact: "code-security-reports-*"
+
+          - download: current
+            artifact: "container-security-*"
+
+          - script: |
+              echo "Generating comprehensive security report..."
+              echo "# Security Scan Report - $(Build.BuildId)" > security-report.md
+              echo "Generated: $(Build.QueueTime)" >> security-report.md
+              echo "" >> security-report.md
+              echo "## Summary" >> security-report.md
+              echo "- Build ID: $(Build.BuildId)" >> security-report.md
+              echo "- Branch: $(Build.SourceBranch)" >> security-report.md
+              echo "- Commit: $(Build.SourceVersion)" >> security-report.md
+              echo "" >> security-report.md
+              echo "## Security Findings" >> security-report.md
+              echo "See attached artifacts for detailed reports." >> security-report.md
+            displayName: "Generate Security Report"
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Security Report"
+            inputs:
+              pathToPublish: "security-report.md"
+              artifactName: "security-report-$(Build.BuildId)"
+              publishLocation: "Container"
+
+          - task: SendEmail@1
+            displayName: "Send Security Report Email"
+            inputs:
+              to: "$(securityTeamEmail)"
+              subject: "Security Scan Report - Century 360 Project - $(Build.BuildId)"
+              body: "Security scan completed. See attached report for details."
+              attachment: "security-report.md"
+            condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'))

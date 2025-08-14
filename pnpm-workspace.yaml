@@ -1,0 +1,13 @@
+ignoredBuiltDependencies:
+  - "@swc/core"
+  - core-js-pure
+
+onlyBuiltDependencies:
+  - "@apollo/protobufjs"
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "@tailwindcss/oxide"
+  - esbuild
+  - prisma
+  - sharp
+  - unrs-resolver

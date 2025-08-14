@@ -1,0 +1,30 @@
+---
+alwaysApply: false
+---
+
+### Purpose
+
+Documentation standards for TSDoc and TypeDoc, aligned with strict linting.
+
+### TSDoc Requirements
+
+- Public functions, React components, hooks, and utilities must include TSDoc.
+- Describe purpose, params, returns, edge cases, and side-effects.
+- Keep comments concise and match Prettier formatting to avoid lint issues.
+
+### TypeDoc
+
+- Generate: `pnpm ui:docs` (outputs to `public/typedoc/`).
+- Embed docs via `scripts/typedoc-embed.mjs` for UI visibility.
+
+### Authoring Guidelines
+
+- Prefer examples over prose for usage patterns.
+- Keep API contracts in sync with `graphql/schema.ts`. Update docs when the schema changes.
+- Update README and domain docs when adding major features.
+
+### PR Checklist
+
+- Added/updated TSDoc where applicable
+- Updated TypeDoc if public APIs changed
+- Kept examples minimal but runnable
