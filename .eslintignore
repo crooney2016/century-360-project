@@ -1,0 +1,32 @@
+# Auto-generated code
+src/generated/**
+src/graphql/generated/**
+prisma/generated/**
+node_modules/**
+.next/**
+out/**
+dist/**
+coverage/**
+public/typedoc/**
+
+# Build artifacts
+*.tsbuildinfo
+next-env.d.ts
+
+# Development and test files
+scripts/**
+tests/**
+**/*.stories.*
+**/*.test.*
+
+# Puck development prototypes (WIP - intentional any types)
+src/components/puck/ComponentGallery.tsx
+src/components/puck/ComponentGalleryClient.tsx
+src/components/puck/ComponentRenderers.tsx
+src/components/puck/ContentEditor.tsx
+src/components/puck/CustomerCard.tsx
+src/components/puck/CustomerDataTable.tsx
+src/components/puck/CustomerGrid.tsx
+src/components/puck/InlineContentEditor.tsx
+src/components/puck/PuckConfig.tsx
+src/components/puck/PuckContentEditor.tsx
